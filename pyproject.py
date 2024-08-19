@@ -1,14 +1,34 @@
+# This project was created as part of a learning exercise and for practice purposes.
+# Make sure to start both Apache and MySQL services in XAMPP, as they are required for the code to work.
+
+import os
 import mysql.connector
 from datetime import date
 
-# Connect to the MySQL database
+# Start XAMPP services (MySQL and Apache)
+print("Starting XAMPP...\n")
+os.system(r'C:\\xampp\\xampp_start.exe')
+
+# Connect to MySQL server
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",
-    database="bank_account"
+    password=""
 )
+
 cursor = mydb.cursor()
+
+# Create the 'bank_account' database if it doesn't exist
+cursor.execute("CREATE DATABASE IF NOT EXISTS bank_account;")
+
+# Now connect to the 'bank_account' database
+mydb.database = 'bank_account'
+
+# Create the 'userdetails' table if it doesn't already exist
+# This table stores the list of usernames, passwords, and balances for users.
+sql="CREATE TABLE IF NOT EXISTS userdetails(username VARCHAR(20), password VARCHAR(20), balance FLOAT);"
+cursor.execute(sql)
+
 
 # Function to deposit an amount into a user's account
 def deposit(username, amount):
@@ -131,49 +151,70 @@ def operation():
             print("Invalid Input")
 
 # Main loop for user sign-in and login
-while True:
-    try:
-        print("\n1.SignIn\n2.LogIn\n3.Exit")
-        userstatus = int(input("Enter your choice: "))
-        
-        if userstatus == 1:
-            username = input("Enter your Username: ")
-            sql = "SELECT * FROM userdetails WHERE username = '%s';" % (username)
-            cursor.execute(sql)
-            row = cursor.fetchone()
-            if row:
-                print("Username already exists")
-            else:
-                password = input("Enter the password: ")
-                sql = "INSERT INTO userdetails (username, password, BALANCE) VALUES ('%s', '%s', %d);" % (username, password, 0)
-                cursor.execute(sql)
-                sql = "CREATE TABLE " + username + " (SLNO INT, CDate VARCHAR(20), WITHDRAWAL FLOAT, DEPOSIT FLOAT, BALANCE FLOAT);"
-                cursor.execute(sql)
-                operation()
-        
-        elif userstatus == 2:
-            username = input("Enter your Username: ")
-            sql = "SELECT * FROM userdetails WHERE username = '%s';" % (username)
-            cursor.execute(sql)
-            row = cursor.fetchone()
-            if row:
-                password = input("Enter the password: ")
-                sql = "SELECT password FROM userdetails WHERE username = '%s';" % (username)
+try:
+    while True:
+        try:
+            print("\n1.SignIn\n2.LogIn\n3.Exit")
+            userstatus = int(input("Enter your choice: "))
+    
+            if userstatus == 1:
+                username = input("Enter your Username: ").strip()
+                if not username:
+                    print("Username cannot be empty, Please enter valid username")
+                    continue
+
+                sql = "SELECT * FROM userdetails WHERE username = '%s';" % (username)
                 cursor.execute(sql)
                 row = cursor.fetchone()
-                if row[0] == password:
-                    operation()
+                if row:
+                    print("Username already exists")
                 else:
-                    print("Wrong Password")
-            else:
-                print("User Doesn't exist")
-        
-        elif userstatus == 3:
-            print("Thank you for using our bank!!")
-            exit(0)
-    
-    except:
-        print("Please enter valid input")
+                    password = input("Enter the password: ").strip()
+                    if not password:
+                        print("Password cannot be empty, Please enter valid password")
+                    sql = "INSERT INTO userdetails (username, password, BALANCE) VALUES ('%s', '%s', %d);" % (username, password, 0)
+                    cursor.execute(sql)
+                    sql = "CREATE TABLE " + username + " (SLNO INT, CDate VARCHAR(20), WITHDRAWAL FLOAT, DEPOSIT FLOAT, BALANCE FLOAT);"
+                    cursor.execute(sql)
+                    operation()
 
-# Close the database connection
-mydb.close()
+            elif userstatus == 2:
+                username = input("Enter your Username: ").strip()
+                if not username:
+                    print("Username cannot be empty, Please enter valid username")
+                    continue
+                sql = "SELECT * FROM userdetails WHERE username = '%s';" % (username)
+                cursor.execute(sql)
+                row = cursor.fetchone()
+                if row:
+                    password = input("Enter the password: ").strip()
+                    if not password:
+                        print("Password cannot be empty, Please enter valid password")
+                    sql = "SELECT password FROM userdetails WHERE username = '%s';" % (username)
+                    cursor.execute(sql)
+                    row = cursor.fetchone()
+                    if row[0] == password:
+                        operation()
+                    else:
+                        print("Wrong Password")
+                else:
+                    print("User Doesn't exist")
+
+            elif userstatus == 3:
+                print("Thank you for using our bank!!")
+                break
+            else:
+                print("Invalid choice")
+
+        except Exception:
+            print("Please Enter valid entry")
+
+except Exception as e:
+    print("An error occurred:", e)
+
+finally:
+    # Close the database connection
+    mydb.close()
+    
+    # Stop XAMPP services (MySQL and Apache)
+    os.system(r'C:\\xampp\\xampp_stop.exe')
