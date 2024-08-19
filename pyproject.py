@@ -1,5 +1,5 @@
 # This project was created as part of a learning exercise and for practice purposes.
-# Make sure to start both Apache and MySQL services in XAMPP, as they are required for the code to work.
+# Make sure you have installed XAMPP in your system, as it are required for the code to work.
 
 import os
 import mysql.connector
