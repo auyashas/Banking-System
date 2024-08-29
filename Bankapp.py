@@ -89,7 +89,7 @@ def withdraw(username, amount):
         
         # Insert the withdrawal transaction into the user's transaction table
         sql = "INSERT INTO " + username + " (SLNO, CDate, WITHDRAWAL, DEPOSIT, BALANCE) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(sql, (sl, cdate, 0.00, amount, balance))
+        cursor.execute(sql, (sl, cdate, amount, 0.00, balance))
         
         print("Rs.", amount, "Withdrawn Successfully")
         mydb.commit()
@@ -108,7 +108,7 @@ def passbook(username):
     cursor.execute(sql)
     result = cursor.fetchall()
     if result:
-        print("Slno\tDate\tDeposit\tWithdraw\tBalance")
+        print("Slno\tDate\tWithdraw\tDeposit\tBalance")
         print("**********************************************")
         for row in result:
             print(row[0], "\t", row[1], "\t", row[2], "\t", row[3], "\t", row[4])
